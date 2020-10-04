@@ -1,0 +1,5 @@
+root = true
+
+[*]
+trim_trailing_whitespace = true
+tab_width = 2
