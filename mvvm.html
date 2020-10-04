@@ -6,31 +6,37 @@
   </head>
   <body>
     <div id="mvvm-app">
+      <p>双绑 浅层</p>
       <input type="text" v-model="someStr" />
+      <br />
+      <p>双绑 嵌套</p>
       <input type="text" v-model="child.someStr" />
-      <!-- <p v-class="className" class="abc">
-        {{someStr}}
-        <span v-text="child.someStr"></span>
-    </p> -->
-      <p>{{ getHelloWord }}</p>
+      <br />
+      <p>字符串插值 计算属性</p>
+      <!-- <p>{{ getHelloWord }}</p> -->
+      <p>{{ className }}</p>
+      <p>v-text指令 双绑 嵌套</p>
+      <p v-text="child.someStr"></p>
+      <p>v-html 指令</p>
       <p v-html="htmlStr"></p>
       <button v-on:click="clickBtn">change model</button>
+      <button @click="clickBtn">change model</button>
     </div>
 
-    <script src="http://cdn.bootcss.com/vue/1.0.25/vue.js"></script>
+    <!-- <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.9/vue.js"></script> -->
     <script src="./js/observer.js"></script>
     <script src="./js/watcher.js"></script>
     <script src="./js/compile.js"></script>
-    <script src="./js/mvvm.js"></script>
+    <script src="./js/mvvm.1.js"></script>
     <script>
       var vm = new MVVM({
         el: "#mvvm-app",
         data: {
-          someStr: "hello ",
+          someStr: "双绑 浅层",
           className: "btn",
-          htmlStr: '<span style="color: #f00;">red</span>',
+          htmlStr: '<span style="color: red;">red</span>',
           child: {
-            someStr: "World !",
+            someStr: "双绑 嵌套",
           },
         },
 
@@ -48,9 +54,9 @@
         },
       });
 
-      vm.$watch("child.someStr", function () {
-        console.log(arguments);
-      });
+      // vm.$watch("child.someStr", function () {
+      //   console.log(arguments);
+      // });
     </script>
   </body>
 </html>
