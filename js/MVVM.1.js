@@ -11,7 +11,8 @@ class MVVM {
     observe(this.$data)
 
     // 需要做代理，一般直接通过vm.xxx 而不是vm.$data.xx
-    this.proxyData(this, '$data')
+    // 这里要操作 this，所以要分开传递
+    this.proxyData(this.$data, this)
 
     // 执行编译
     new Compiler(options.el, this)
@@ -20,18 +21,19 @@ class MVVM {
 
   /**
    * 代理函数，代理 vm.$data.xx ==> vm.xx
-   * @param {*} vm
-   * @param {*} data
+   * @param {*} $data
+   * @param {*} this
    */
-  proxyData(vm, key) {
-    Object.keys(vm[key]).forEach((i) => {
+  proxyData($data, that) {
+    Object.keys($data).forEach((dataKey) => {
       // 为当前实例做代理
-      Object.defineProperty(vm, i, {
+      Object.defineProperty(that, dataKey, {
         get() {
-          return vm[key][i]
+          return $data[dataKey]
         },
         set(val) {
-          vm[key][i] = val
+          //  后续这里可能还会set一个对象，要兼容
+          $data[dataKey] = val
         },
       })
     })

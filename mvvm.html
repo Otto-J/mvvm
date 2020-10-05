@@ -3,22 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <title>MVVM</title>
+    <style>
+      .highlight {
+        color: red;
+      }
+    </style>
   </head>
   <body>
     <div id="mvvm-app">
-      <p>双绑 浅层</p>
-      <input type="text" v-model="someStr" />
+      <p>双绑 浅层：</p>
+      <input class="highlight" type="text" v-model="someStr" />
       <br />
-      <p>双绑 嵌套</p>
-      <input type="text" v-model="child.someStr" />
+      <p>双绑 嵌套：</p>
+      <input class="highlight" type="text" v-model="child.someStr" />
       <br />
-      <p>字符串插值 计算属性</p>
+      <p>计算属性：</p>
       <!-- <p>{{ getHelloWord }}</p> -->
-      <p>{{ className }}</p>
-      <p>v-text指令 双绑 嵌套</p>
-      <p v-text="child.someStr"></p>
-      <p>v-html 指令</p>
-      <p v-html="htmlStr"></p>
+      <p>
+        <span>字符串插值：</span>
+        <span class="highlight">{{ className }}</span>
+      </p>
+      <p>v-text指令 双绑 嵌套：</p>
+      <p class="highlight" v-text="child.someStr"></p>
+      <p>v-html 指令：</p>
+      <p class="highlight" v-html="htmlStr"></p>
       <button v-on:click="clickBtn">change model</button>
       <button @click="clickBtn">change model</button>
     </div>
@@ -33,8 +41,8 @@
         el: "#mvvm-app",
         data: {
           someStr: "双绑 浅层",
-          className: "btn",
-          htmlStr: '<span style="color: red;">red</span>',
+          className: "字符串插值",
+          htmlStr: '<span style="color: red;">HTML包含样式</span>',
           child: {
             someStr: "双绑 嵌套",
           },

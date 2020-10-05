@@ -1,8 +1,8 @@
 class Compiler {
   /**
-   * 实现 Compiler new Compiler(el, vm)
+   * 实现 new Compiler(el, vm)
    * @param {string|HTMLElement} el 页面宿主选择器
-   * @param {any} vm vue的实例
+   * @param {MVVM} vm MVVM的实例
    */
   constructor(el, vm) {
     this.$el = this.isElementNode(el) ? el : document.querySelector(el)
@@ -24,7 +24,7 @@ class Compiler {
    * @param {string}} attr 属性值
    */
   isEventDirectiveWithOn(dir) {
-    return dir.startsWith('on')
+    return dir.startsWith('on:')
   }
   isEventDirectiveWithAt(dir) {
     return dir.startsWith('@')
@@ -36,7 +36,7 @@ class Compiler {
    * @return {boolean}
    */
   isElementNode(el) {
-    return el.nodeType == 1
+    return el.nodeType === 1
   }
 
   /**
@@ -44,6 +44,7 @@ class Compiler {
    * @param {HTMLElement} node
    */
   isInter(node) {
+    // 如果能匹配到，就放到 RegExp.$1
     return node.nodeType === 3 && /\{\{(.*)\}\}/.test(node.textContent)
   }
 
@@ -52,21 +53,33 @@ class Compiler {
    * @param {HTMLElement} element
    */
   compile(element) {
-    element.childNodes.forEach((node) => {
-      if (this.isElementNode(node)) {
-        // 如果是元素
-        // console.log('编译元素', node.nodeName)
-        this.compileElement(node)
-      } else if (this.isInter(node)) {
-        // console.log('文本节点', node.textContent)
-        this.compileText(node)
-      }
-      // 还要考虑递归
-      if (node.childNodes.length) {
-        this.compile(node)
-      }
-    })
+    let fragment = document.createDocumentFragment()
+    let child
+    while ((child = element.firstChild)) {
+      fragment.appendChild(child)
+    }
+
+    const repeat = (fragment) => {
+      Array.from(fragment.childNodes).forEach((node) => {
+        if (this.isElementNode(node)) {
+          // 如果是元素
+          // console.log('编译元素', node.nodeName)
+          this.compileElement(node)
+        } else if (this.isInter(node)) {
+          // console.log('文本节点', node.textContent)
+          this.compileText(node)
+        }
+        // 还要考虑递归
+        if (node.childNodes.length) {
+          repeat(node)
+        }
+      })
+    }
+    repeat(fragment)
+
+    element.appendChild(fragment)
   }
+
   /**
    * 编译 v-text v-html 等事件和指令
    * @param {HTMLElement} node
@@ -83,7 +96,7 @@ class Compiler {
         // const dir = name.substring(2) 等同
         const [, dir] = name.split('-')
         // eg: text html model
-        this.update(node, value.trim(), dir)
+        this.update(node, value, dir)
       } else if (this.isEventDirectiveWithOn(name)) {
         // 观察是否有on-开头的事件
       } else if (this.isEventDirectiveWithAt(name)) {
@@ -91,6 +104,7 @@ class Compiler {
       }
     })
   }
+
   /**
    * compoileText 绑定插值
    * @param {HTMLelement} node
@@ -98,6 +112,7 @@ class Compiler {
   compileText(node) {
     // DOM 操作 获取匹配的表达式 eg: counter --> this.counter
     // 这里的 RegExp.$1 拿到的就是 'counter'
+    // 这里还要考虑 this.a.b 获取嵌套的值 和 <p>值-{{a}}-</p> 插值在中间的情况
     this.update(node, RegExp.$1, 'text')
   }
 
@@ -109,32 +124,48 @@ class Compiler {
    */
   update(node, data, dir) {
     const fn = this[dir + 'Updater']
-    data = data.trim()
-    // 首先执行一次，eg this.textUpdater
-    fn && fn(node, this.$vm[data])
+    data = data.trim() // 避免左右空格
+    // eg this.textUpdater
+    // 这里要考虑 传入 a.b 的情况
+    // to do
+
+    const arr = data.split('.') // ['a','b']
+
+    let val = null
+
+    arr.forEach((key) => (val = this.$vm[key]))
+    // arr.reduce((acc, cur) => {},this.$vm)
+
+    fn && fn(node, val)
 
     // Watcher
-    new Watcher(this.$vm, data, (val) => {
-      fn && fn(node, val)
-    })
+    // new Watcher(this.$vm, data, (value) => {
+    //   fn && fn(node, value)
+    // })
   }
 
   /**
    * 更新节点，替代 text方法
    * @param {HTMLElement} node
-   * @param {*} data
+   * @param {*} value
    */
-  textUpdater(node, data) {
-    node.textContent = data
+  textUpdater(node, value) {
+    console.log(node, value)
+    if (value) {
+      // 要考虑
+      node.textContent = node.textContent.replace(/\{\{(.*)\}\}/, value)
+    } else {
+      node.textContent = value
+    }
   }
 
   /**
    * 更新节点，替代 html
    * @param {HTMLElement} node
-   * @param {*} data
+   * @param {*} value
    */
-  htmlUpdater(node, data) {
-    node.innerHTML = data
+  htmlUpdater(node, value) {
+    node.innerHTML = value
   }
 
   modelUpdater() {}
