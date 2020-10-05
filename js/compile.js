@@ -127,16 +127,14 @@ class Compiler {
     data = data.trim() // 避免左右空格
     // eg this.textUpdater
     // 这里要考虑 传入 a.b 的情况
-    // to do
-
     const arr = data.split('.') // ['a','b']
 
-    let val = null
+    let flatData = this.$vm
 
-    arr.forEach((key) => (val = this.$vm[key]))
+    arr.forEach((key) => (flatData = flatData[key]))
     // arr.reduce((acc, cur) => {},this.$vm)
 
-    fn && fn(node, val)
+    fn && fn(node, flatData)
 
     // Watcher
     // new Watcher(this.$vm, data, (value) => {
@@ -151,7 +149,7 @@ class Compiler {
    */
   textUpdater(node, value) {
     console.log(node, value)
-    if (value) {
+    if (node.textContent) {
       // 要考虑
       node.textContent = node.textContent.replace(/\{\{(.*)\}\}/, value)
     } else {

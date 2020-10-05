@@ -21,10 +21,12 @@
       <!-- <p>{{ getHelloWord }}</p> -->
       <p>
         <span>字符串插值：</span>
-        <span class="highlight">{{ className }}</span>
+        <span class="highlight">=== {{ className }}</span>
       </p>
-      <p>v-text指令 双绑 嵌套：</p>
-      <p class="highlight" v-text="child.someStr"></p>
+      <p>
+        <span>v-text指令 双绑 嵌套：</span>
+        <span class="highlight" v-text="child.someStr"></span>
+      </p>
       <p>v-html 指令：</p>
       <p class="highlight" v-html="htmlStr"></p>
       <button v-on:click="clickBtn">change model</button>
